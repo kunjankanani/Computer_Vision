@@ -1,0 +1,64 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+img=plt.imread(" ")
+plt.imshow(img)
+
+grayimg=np.dot(img[:,:,:3],[0.2989,0.5870,0.1140])
+plt.imshow(grayimg,cmap='gray')
+
+grayimgarr=np.array(grayimg)
+grayimgarr.shape
+
+grayimgarr=grayimgarr.reshape(2160, 3840,1)
+grayimgarr.shape
+
+def convolution(image,kernel):
+#     mode=valid
+    rows,cols,newaxis=image.shape
+    m,n= kernel.shape
+    ystride=rows-m+1
+    xstride=cols-n+1
+    
+    new_img=np.zeros((ystride,xstride,newaxis))
+    count=0
+    new_img_temp=new_img.flatten()
+    new_img_temp=new_img_temp.reshape(-1,1)
+    print(new_img_temp.shape)
+    for i in range(ystride):
+        for j in range(xstride):
+            for c in range(newaxis):
+#                 c will be 1 only as gray image
+                sub_matrix=image[i:i+m,j:j+n,c]
+                new_img_temp[count,c] = np.sum(sub_matrix * kernel)
+            count+=1
+    new_img = new_img_temp.reshape(ystride,xstride,newaxis)
+    return new_img
+
+
+def gaussian_filter(image,sigma,filter_shape):
+    m,n=filter_shape
+    m_half=m//2
+    n_half=n//2
+    gfilter=np.zeros((m,n))
+    
+    for y in range(-m_half,m_half):
+        for x in range(-n_half,n_half):
+            normal= 1/(2.0* np.pi*sigma**2.0)
+            exp_term=np.exp(-(x**2.0+y**2.0)/2.0*sigma**2.0)
+            gfilter[y+m_half,x+n_half]=normal*exp_term
+            
+    blurred = convolution(image, gfilter)
+    return gfilter, blurred.astype(np.uint8)
+
+g_filter, blur_image = gaussian_filter(grayimgarr, 5, (3, 3))
+
+plt.figure(figsize=(15,15))
+plt.subplot(1,2,1)
+plt.imshow(grayimg,cmap='gray')
+plt.title('Original Image')
+
+plt.subplot(1,2,2)
+plt.imshow(blur_image,cmap='gray')
+plt.title('Gaussian Blurred  Image')
