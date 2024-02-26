@@ -1,0 +1,43 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+img_filename="image5.jpeg"
+
+img=plt.imread(img_filename)
+plt.imshow(img)
+plt.show()
+
+imgray=np.dot(img[...,:3],[0.2989, 0.5870, 0.1140])
+plt.imshow(imgray,cmap='gray')
+plt.show()
+
+img_array=np.array(imgray)
+img_array
+
+#Perform Histtogram Equalization
+img_array = img_array.astype(np.uint8)
+hist_array=np.bincount(img_array.flatten(),minlength=256)
+
+num_pixels=np.sum(hist_array)
+
+hist_array=hist_array/num_pixels
+chist_array=np.cumsum(hist_array)
+transform_map=np.floor(255*chist_array).astype(np.uint8)
+
+img_list=list(img_array.flatten())
+eq_img_list=[transform_map[p] for p in img_list]
+eq_img_array=np.reshape(np.asarray(eq_img_list),img_array.shape)
+
+#original Image
+plt.subplot(1,2,1)
+plt.imshow(img_array,cmap='gray')
+plt.title('Original Image')
+plt.axis('off')
+
+#Equalized Image
+plt.subplot(1,2,2)
+plt.imshow(eq_img_array,cmap='gray')
+plt.title('Equalized  Image')
+plt.axis('off')
+
+plt.show()
