@@ -1,1 +1,101 @@
 # Computer_Vision
+
+#contrast stretching
+import numpy as np
+from matplotlib import image as img
+from matplotlib import pyplot as plt
+
+im = plt.imread('/content/colorful-pictures.jpg')
+min_val = np.min(im)
+max_val = np.max(im)
+print(min_val)
+print(max_val)
+
+new_min_val = 0
+new_max_val = 150
+
+#stretched_image = image - (image.min()) * (255/(image.max() - image.min()))
+stretched_image = ((im - min_val)/(max_val - min_val))*(new_max_val-new_min_val)+new_min_val
+plt.imshow(im)
+plt.show()
+plt.imshow(stretched_image)
+plt.show()
+
+
+
+#sharpening
+image1 = plt.imread('/content/grayscale-image.jpg')
+image = np.mean(image1, axis=2)
+kernel = np.array([[-1, -1, -1],
+                   [-1,  9, -1],
+                   [-1, -1, -1]])
+sharp = np.zeros_like(image, dtype=np.float64)
+padded = np.pad(image, ((1,1),(1,1)),mode='edge')
+for i in range(image.shape[0]):
+  for j in range(image.shape[1]):
+    sharp[i, j] = np.sum(padded[i:i+3, j:j+3]*kernel)
+    sharp[i, j] = np.clip(sharp[i, j], 0, 255)
+
+plt.imshow(image, cmap='gray')
+plt.title("original image")
+plt.show()
+plt.imshow(sharp, cmap='gray')
+plt.title("sharpened image")
+plt.show()
+
+
+
+#blurring
+image1 = plt.imread('/content/grayscale-image.jpg')
+image = np.mean(image1, axis=2)
+kernel = np.array([[1/50, 1/50, 1/50],
+                   [1/50, 1/50, 1/50],
+                   [1/50, 1/50, 1/50]])
+
+blur = np.zeros_like(image, dtype=np.float64)
+pad = np.pad(image, ((1,1),(1,1)),mode='edge')
+for i in range(image.shape[0]):
+  for j in range(image.shape[1]):
+    blur[i, j] = np.sum(pad[i:i+3, j:j+3]*kernel)
+    
+plt.imshow(image, cmap='gray')
+plt.title("original image")
+plt.show()
+plt.imshow(blur, cmap='gray')
+plt.title("blurred image")
+plt.show()
+
+
+#laplacian
+image1 = plt.imread('/content/grayscale-image.jpg')
+image = np.mean(image1, axis=2)
+kernel = np.array([[0,  -1,  0],
+                   [-1,  4, -1],
+                   [0,  -1,  0]])
+filter = np.zeros_like(image, dtype=np.float64)
+pad = np.pad(image, ((1,1),(1,1)),mode='edge')
+for i in range(image.shape[0]):
+   for j in range(image.shape[1]):
+    filter[i, j] = np.sum(pad[i:i+3, j:j+3]*kernel)
+filter.astype(np.uint8)
+    
+plt.imshow(image, cmap='gray')
+plt.title("original image")
+plt.show()
+plt.imshow(filter, cmap='gray')
+plt.title("blurred image")
+plt.show()
+
+
+#histogram equalization
+image = plt.imread('/content/colorful-pictures.jpg')
+histogram, bins=np.histogram(image.flatten(), bins=256, range=(0,256))
+cdf = histogram.cumsum()
+cdf_norma =(cdf - cdf.min()) * 255 / (cdf.max() - cdf.min())
+equalized = np.interp(image.flatten(), range(256), cdf_norma).reshape(image.shape).astype(np.uint8)
+
+plt.imshow(equalized, cmap='gray')
+plt.show()
+
+
+
